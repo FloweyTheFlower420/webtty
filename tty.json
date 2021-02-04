@@ -1,0 +1,15 @@
+[
+  {
+    "name": "test",
+    "ports": [
+      {
+        "name": "port1",
+        "tty": "/dev/ttyUSB0"
+      },
+      {
+        "name": "port2",
+        "tty": "/dev/ttyUSB1"
+      }
+    ]
+  }
+]

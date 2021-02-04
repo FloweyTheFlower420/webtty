@@ -1,0 +1,49 @@
+group 'com.floweytf.tty'
+version '1.0'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+mainClassName = 'com.floweytf.tty.Main'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+
+task fatJar(type: Jar) {
+
+    manifest {
+        attributes 'Implementation-Title': 'tty-server',
+                'Implementation-Version': version,
+                'Main-Class': 'com.floweytf.tty.Main'
+    }
+
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task startServer(type: JavaExec){
+    main = "com.floweytf.tty.Main"
+    description = "Start server"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+jar.dependsOn(fatJar)
+
+dependencies {
+    compile 'org.jetbrains:annotations:20.1.0'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile files('C:\\Users\\FloweyTF\\compress\\BetterLogger\\build\\libs\\BetterLogger-1.0.0.jar')
+    compile 'com.sparkjava:spark-core:2.6.0'
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'org.elasticsearch.client:transport:5.4.1'
+    compile 'javax.validation:validation-api:1.1.0.Final'
+    compile 'javax.el:javax.el-api:2.2.5'
+    compile 'io.socket:socket.io-server:1.0.3'
+}
