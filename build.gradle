@@ -35,6 +35,7 @@ task startServer(type: JavaExec){
 }
 
 jar.dependsOn(fatJar)
+run.dependsOn(jar);
 
 dependencies {
     compile 'org.jetbrains:annotations:20.1.0'
@@ -45,5 +46,4 @@ dependencies {
     compile 'org.elasticsearch.client:transport:5.4.1'
     compile 'javax.validation:validation-api:1.1.0.Final'
     compile 'javax.el:javax.el-api:2.2.5'
-    compile 'io.socket:socket.io-server:1.0.3'
 }

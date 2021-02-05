@@ -5,7 +5,6 @@ import com.floweytf.betterlogger.ConsoleTransport;
 import com.floweytf.betterlogger.FileTransport;
 import com.google.gson.Gson;
 import org.eclipse.jetty.util.log.Log;
-import org.yaml.snakeyaml.Yaml;
 
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
@@ -21,6 +20,8 @@ class ConnectionInit {
 
 public class Main {
     static BetterLogger logger;
+    static SessionManager sessions;
+    static Gson gson = new Gson();
 
     public static void main(String[] args) throws SessionException {
         logger = new BetterLogger("ttyserver")
@@ -29,10 +30,7 @@ public class Main {
 
         Log.setLog(new BetterLogger(logger, Log.class));
         logger.info("setting up server...");
-
-        SessionManager sessions = new SessionManager();
-        Gson gson = new Gson();
-        Yaml yaml = new Yaml();
+        sessions = new SessionManager();
 
         // load config
         logger.info("running at path {}", Paths.get(".").toAbsolutePath().normalize().toString());
@@ -40,6 +38,8 @@ public class Main {
         config.getConfig("tty.json");
 
         port(16383);
+
+        webSocket("/device/heartbeat", SocketServer.class);
 
         get("/", (request, response) -> {
             return "A";
@@ -56,8 +56,16 @@ public class Main {
             return res;
         });
 
-        exception(Exception.class, (exception, request, response) -> {
-            //exception.printStackTrace();
+        post("/device/close", (req, res) -> {
+            logger.info("closing session: " + req.body());
+            sessions.closeSession(UUID.fromString(req.body()));
+            return res;
+        });
+
+        exception(Exception.class, (e, req, res) -> {
+            logger.error("internal server error!", e);
+            res.status(500);
+            res.body("Internal server error");
         });
     }
 }
