@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<code class="apidoc">/device/heartbeat (WebSocket) ->
+    request (JSON): {"uuid": [session], "buffer": [buffer]}
+    response (RAW): tty output
+/device/open (HTTP) ->
+    request (JSON): {"device": [device], "port": [port]}
+    response:
+        {"id": [session], "tty": "/dev/ttyUSB*" } (200)
+        Invalid device/tty name (400)
+/device/close/ (HTTP) ->
+</code>
+</body>
+</html>

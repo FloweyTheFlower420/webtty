@@ -56,6 +56,9 @@ public class SessionManager {
 
     @ApiStatus.Internal
     public void cleanup() {
+        if(Main.cmd.hasOption("no-timeout"))
+            return;
+
         final BetterLogger logger = new BetterLogger(Main.logger) {{
             loggerName = "SessionManger/" + Thread.currentThread().getName();
         }};

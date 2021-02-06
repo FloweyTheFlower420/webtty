@@ -28,10 +28,13 @@ task fatJar(type: Jar) {
     with jar
 }
 
-task startServer(type: JavaExec){
+task debug(type: JavaExec) {
     main = "com.floweytf.tty.Main"
-    description = "Start server"
+    group = 'application'
+    description = "Debug server"
     classpath = sourceSets.main.runtimeClasspath
+    args '--debug'
+    args '--no-timeout'
 }
 
 jar.dependsOn(fatJar)
@@ -43,7 +46,5 @@ dependencies {
     compile 'com.sparkjava:spark-core:2.6.0'
     compile project(":logger")
     compile 'com.google.code.gson:gson:2.6.2'
-    compile 'org.elasticsearch.client:transport:5.4.1'
-    compile 'javax.validation:validation-api:1.1.0.Final'
-    compile 'javax.el:javax.el-api:2.2.5'
+    compile 'commons-cli:commons-cli:1.4'
 }
