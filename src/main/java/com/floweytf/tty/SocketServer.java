@@ -15,15 +15,18 @@ public class SocketServer {
 
     @OnWebSocketConnect
     public void onConnect(Session user) throws Exception {
-
+        Main.logger.debug("Websocket connected!");
     }
 
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
+        Main.logger.debug("Websocket disconnected!");
     }
 
     @OnWebSocketMessage
     public void onMessage(Session user, String message) {
+        Main.logger.debug("Recevied websock connection: " + message);
+        
         try {
             ConnectionHeartbeat heartbeat = Main.gson.fromJson(message, ConnectionHeartbeat.class);
             user.getRemote().sendString(Main.sessions.heartbeat(UUID.fromString(heartbeat.uuid), heartbeat.buffer));

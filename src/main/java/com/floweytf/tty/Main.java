@@ -69,7 +69,7 @@ public class Main {
 
         post("/device/open", (req, res) -> {
             // attempt to open a tty
-            logger.info("creating new session...");
+            logger.debug("creating new session...");
             try {
                 // get data from
                 logger.info(req.body());
@@ -83,16 +83,14 @@ public class Main {
                 // get UUID
                 UUID uid = sessions.newSession(s);
 
-                // send response
-                res.body(gson.toJson(new ConnectionOpenResponse() {{
-                    id = uid.toString();
-                    tty = s;
-                }}, ConnectionOpenResponse.class));
-
                 res.header("Content-Type", "application/json");
                 res.status(OK);
 
                 logger.info("created session (" + uid.toString() + ") with dev " + packet.device + ":" + packet.tty);
+                return gson.toJson(new ConnectionOpenResponse() {{
+                    id = uid.toString();
+                    tty = s;
+                }}, ConnectionOpenResponse.class);
             }
             catch (JsonParseException e) {
                 // invalid json message request
@@ -104,16 +102,16 @@ public class Main {
                 logger.error("failed to create session :(", e);
                 res.header("Content-Type", "text/pain");
                 halt(INTERNAL_SERVER_ERROR, e.getMessage());
-            }
-            return res;
+            }   
+            return "";
         });
 
         post("/device/close", (req, res) -> {
-            logger.info("closing session: " + req.body());
+            logger.debug("closing session: " + req.body());
             sessions.closeSession(UUID.fromString(req.body()));
 
             res.status(OK);
-            return res;
+            return "";
         });
 
         exception(Exception.class, (e, req, res) -> {
