@@ -15,13 +15,12 @@ public class SocketServer {
         loggerName = "socket-server";
     }};
     public static class SocketPayload {
-        String id;
         String buffer;
 
         String tty;
         String device;
         public int getType() {
-            boolean t1 = id != null && buffer != null;
+            boolean t1 = buffer != null;
             boolean t2 = tty != null && device != null;
 
             if(t1 == t2)
@@ -34,7 +33,6 @@ public class SocketServer {
     }
 
     static class ConnectionOpenResponse {
-        String id;
         String tty;
     }
 
@@ -46,6 +44,7 @@ public class SocketServer {
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
         Main.logger.debug("Websocket disconnected!");
+        Main.sessions.closeSession(user);
     }
 
     @OnWebSocketMessage
@@ -59,7 +58,7 @@ public class SocketServer {
                     user.close(400, "Invalid payload!");
                     break;
                 case 1:
-                    Main.sessions.heartbeat(UUID.fromString(heartbeat.id), heartbeat.buffer);
+                    Main.sessions.heartbeat(user, heartbeat.buffer);
                     break;
                 case 2:
                     String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);
@@ -69,11 +68,10 @@ public class SocketServer {
                         user.close(400, "Invalid device/tty!");
 
                     // get UUID
-                    UUID uid = Main.sessions.newSession(s, user);
+                    Main.sessions.newSession(s, user);
 
-                    logger.info("created session (" + uid.toString() + ") with dev " + heartbeat.device + ":" + heartbeat.tty);
+                    logger.info("created session (" + user + ") with dev " + heartbeat.device + ":" + heartbeat.tty);
                     user.getRemote().sendString(Main.gson.toJson(new ConnectionOpenResponse() {{
-                        id = uid.toString();
                         tty = s;
                     }}, ConnectionOpenResponse.class));
                     break;
