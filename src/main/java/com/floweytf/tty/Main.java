@@ -29,7 +29,7 @@ public class Main {
     public static SessionManager sessions;
     public static Gson gson = new Gson();
     public static CommandLine cmd;
-    public static Configuration config;
+    public static Configuration config = new Configuration();
 
     public static void main(String[] args) throws SessionException {
         cmd = CLIParser.parse(args);
