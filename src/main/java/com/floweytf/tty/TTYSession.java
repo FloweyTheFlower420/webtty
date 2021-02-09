@@ -21,7 +21,7 @@ public class TTYSession {
     private BetterLogger logger;
     private Session websock;
 
-    public TTYSession(String tty) throws SessionException {
+    public TTYSession(String tty, Session session) throws SessionException {
         runner = new Thread(this::poll);
         runner.setName("session-" + runner.getId());
         try {
@@ -33,6 +33,8 @@ public class TTYSession {
             reader = new FileInputStream(file);
             writer = new FileOutputStream(file, true);
             logger.info("tty has been opened successfully!");
+            this.websock = session;
+            runner.start();
         }
         catch (FileNotFoundException e) {
             logger.error("Failed to open tty!", (Throwable)e);
@@ -40,11 +42,6 @@ public class TTYSession {
         }
 
         logger.loggerName = Main.logger.loggerName + "/" + runner.getName();
-    }
-
-    public void start(Session session) {
-        this.websock = session;
-        runner.start();
     }
 
     @ApiStatus.Internal

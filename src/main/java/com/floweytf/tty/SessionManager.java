@@ -1,6 +1,7 @@
 package com.floweytf.tty;
 
 import com.floweytf.betterlogger.BetterLogger;
+import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class SessionManager {
         oldSessionCleanup.start();
     }
 
-    public UUID newSession(String tty) throws SessionException {
+    public UUID newSession(String tty, Session s) throws SessionException {
         // starts a new session
         if(ttyInUse.contains(tty))
             throw new SessionException("TTY is already in use!");
@@ -37,20 +38,19 @@ public class SessionManager {
         UUID newId = UUID.randomUUID();
         sessions.put(newId, new SessionMeta() {{
             lastConnect = System.currentTimeMillis();
-            session = new TTYSession(tty);
+            session = new TTYSession(tty, s);
         }});
 
         ttyInUse.add(tty);
         return newId;
     }
 
-    public String heartbeat(UUID uid, String data) throws SessionException {
+    public void heartbeat(UUID uid, String data) throws SessionException {
         if(crashed.containsKey(uid))
             throw new SessionException(crashed.get(uid));
         if(!sessions.containsKey(uid))
             throw new SessionException("Session has been lost/invalid session ID!");
         sessions.get(uid).session.write(data);
-        return sessions.get(uid).session.getBuf();
     }
 
     @ApiStatus.Internal

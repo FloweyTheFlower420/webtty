@@ -16,15 +16,7 @@ import java.util.concurrent.ExecutionException;
 
 import static spark.Spark.*;
 
-class ConnectionInit {
-    String tty;
-    String device;
-}
 
-class ConnectionOpenResponse {
-    String id;
-    String tty;
-}
 
 public class Main {
     // http error codes
@@ -37,6 +29,7 @@ public class Main {
     public static SessionManager sessions;
     public static Gson gson = new Gson();
     public static CommandLine cmd;
+    public static Configuration config;
 
     public static void main(String[] args) throws SessionException {
         cmd = CLIParser.parse(args);
@@ -50,7 +43,6 @@ public class Main {
 
         // load config
         logger.info("running at path {}", Paths.get(".").toAbsolutePath().normalize().toString());
-        Configuration config = new Configuration();
         if(cmd.hasOption("config"))
             config.getConfig(cmd.getOptionValue("config"));
         else
@@ -71,53 +63,6 @@ public class Main {
             res.redirect("/public/home/api.html");
 
             return res;
-        });
-
-        post("/device/open", (req, res) -> {
-            // attempt to open a tty
-            logger.debug("creating new session...");
-            try {
-                // get data from
-                logger.info(req.body());
-                ConnectionInit packet = gson.fromJson(req.body(), ConnectionInit.class);
-                String s = config.getTTY(packet.device + '.' + packet.tty);
-
-                // make sure that the tty exists in config
-                if(s == null)
-                    halt(INVALID_REQUEST, "Invalid device/tty name");
-
-                // get UUID
-                UUID uid = sessions.newSession(s);
-
-                res.header("Content-Type", "application/json");
-                res.status(OK);
-
-                logger.info("created session (" + uid.toString() + ") with dev " + packet.device + ":" + packet.tty);
-                return gson.toJson(new ConnectionOpenResponse() {{
-                    id = uid.toString();
-                    tty = s;
-                }}, ConnectionOpenResponse.class);
-            }
-            catch (JsonParseException e) {
-                // invalid json message request
-                res.header("Content-Type", "text/pain");
-                halt(INVALID_REQUEST, "Cannot parse JSON");
-            }
-            catch (SessionException e) {
-                // cannot open tty
-                logger.error("failed to create session :(", e);
-                res.header("Content-Type", "text/pain");
-                halt(INTERNAL_SERVER_ERROR, e.getMessage());
-            }   
-            return "";
-        });
-
-        post("/device/close", (req, res) -> {
-            logger.debug("closing session: " + req.body());
-            sessions.closeSession(UUID.fromString(req.body()));
-
-            res.status(OK);
-            return "";
         });
 
         exception(Exception.class, (e, req, res) -> {
