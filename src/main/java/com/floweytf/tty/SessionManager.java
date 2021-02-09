@@ -10,11 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SessionManager {
     public static class SessionMeta {
-        public Session session;
+        public TTYSession session;
         public Long lastConnect;
     }
     public static final int HEARTBEAT_MAX_TIME = 1000;
@@ -38,7 +37,7 @@ public class SessionManager {
         UUID newId = UUID.randomUUID();
         sessions.put(newId, new SessionMeta() {{
             lastConnect = System.currentTimeMillis();
-            session = new Session(tty);
+            session = new TTYSession(tty);
         }});
 
         ttyInUse.add(tty);

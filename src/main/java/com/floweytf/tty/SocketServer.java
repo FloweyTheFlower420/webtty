@@ -9,7 +9,7 @@ import java.util.UUID;
 @WebSocket
 public class SocketServer {
     public static class ConnectionHeartbeat {
-        String uuid;
+        String id;
         String buffer;
     }
 
@@ -29,7 +29,7 @@ public class SocketServer {
         
         try {
             ConnectionHeartbeat heartbeat = Main.gson.fromJson(message, ConnectionHeartbeat.class);
-            user.getRemote().sendString(Main.sessions.heartbeat(UUID.fromString(heartbeat.uuid), heartbeat.buffer));
+            user.getRemote().sendString(Main.sessions.heartbeat(UUID.fromString(heartbeat.id), heartbeat.buffer));
         }
         catch (SessionException | JsonSyntaxException e) {
             user.getRemote().sendString(e.getMessage());

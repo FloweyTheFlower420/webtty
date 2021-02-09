@@ -4,7 +4,7 @@
     "ports": [
       {
         "name": "port1",
-        "tty": "/dev/ttyUSB2"
+        "tty": "/dev/ttyUSB7"
       },
       {
         "name": "port2",
