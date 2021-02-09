@@ -58,7 +58,7 @@ public class SocketServer {
                     user.close(400, "Invalid payload!");
                     break;
                 case 1:
-                    Main.sessions.heartbeat(user, heartbeat.buffer);
+                    Main.sessions.write(user, heartbeat.buffer);
                     break;
                 case 2:
                     String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);

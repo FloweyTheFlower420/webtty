@@ -27,7 +27,7 @@ public class SessionManager {
         ttyInUse.add(tty);
     }
 
-    public void heartbeat(Session s, String data) throws SessionException {
+    public void write(Session s, String data) throws SessionException {
         if(crashed.containsKey(s))
             throw new SessionException(crashed.get(s));
         if(!sessions.containsKey(s))
