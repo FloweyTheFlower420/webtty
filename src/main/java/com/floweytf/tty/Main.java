@@ -31,7 +31,7 @@ public class Main {
     public static CommandLine cmd;
     public static Configuration config = new Configuration();
 
-    public static void main(String[] args) throws SessionException {
+    public static void main(String[] args) {
         cmd = CLIParser.parse(args);
         logger = new BetterLogger("ttyserver")
                 .addTransport(new ConsoleTransport(cmd.hasOption('d') ? BetterLogger.DEBUG : BetterLogger.INFO))
@@ -55,7 +55,7 @@ public class Main {
 
         port(16383);
 
-        webSocket("/device/heartbeat", SocketServer.class);
+        webSocket("/device", SocketServer.class);
 
         staticFiles.location("/public");
 
