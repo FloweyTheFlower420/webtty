@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static spark.Spark.*;
 
@@ -54,6 +55,11 @@ public class Main {
             config.getConfig(cmd.getOptionValue("config"));
         else
             config.getConfig("tty.json");
+
+        threadPool(16);
+
+        if (cmd.hasOption("spark-threads"))
+            threadPool(Integer.parseInt(cmd.getOptionValue("spark-threads")));
 
         port(16383);
 

@@ -16,6 +16,8 @@ public class CLIParser {
         Option r3 = new Option(null, "config", true, "sets tty file to open");
         r3.setRequired(false);
 
+        Option r4 = new Option(null, "spark-threads", true, "sets the number of threads");
+
         options.addOption(r1);
         options.addOption(r2);
         options.addOption(r3);
