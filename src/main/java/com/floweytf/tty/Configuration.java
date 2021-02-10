@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +31,7 @@ public class Configuration {
             for (JsonElement e : arr) {
                 String name = e.getAsJsonObject().get("name").getAsString();
                 HashMap<String, String> ttys = new HashMap<>();
-                for(JsonElement el : e.getAsJsonObject().get("ports").getAsJsonArray()) {
+                for (JsonElement el : e.getAsJsonObject().get("ports").getAsJsonArray()) {
                     ttys.put(el.getAsJsonObject().get("name").getAsString(), el.getAsJsonObject().get("tty").getAsString());
                     processList.add(r.exec("stty -F " + el.getAsJsonObject().get("tty").getAsString() + " " + el.getAsJsonObject().get("baud").getAsInt() +
                             "1>/dev/null 2>&1"));
@@ -39,14 +41,14 @@ public class Configuration {
             }
 
             for (Process p : processList) {
-                if(p.waitFor() != 0) {
+                p.waitFor();
+                if(p.exitValue() != 0)
                     Main.logger.fatal(-1, "Unable to set baud rate");
-                }
             }
-
             this.tty = tty;
         } catch (Exception e) {
             Main.logger.fatal(-1, "Failed to load/parse config", e);
         }
+
     }
 }
