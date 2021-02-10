@@ -40,10 +40,9 @@ public class SocketServer {
         Main.logger.info("Recevied websock connection: " + message);
         
         try {
-            if (Main.sessions.contains(user)) {
-                // treat as raw buffer
+            if (Main.sessions.contains(user))
                 Main.sessions.write(user, message);
-            }
+
             else {
                 ConnectionInit heartbeat = Main.gson.fromJson(message, ConnectionInit.class);
                 String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);
