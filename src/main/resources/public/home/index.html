@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+    <link rel="stylesheet" href="xterm.css" />
+    <script src="xterm.js"></script>
 </head>
 <body>
+<div id="terminal"></div>
 <script>
     // Create WebSocket connection.
-const socket = new WebSocket('ws://localhost:8080');
-
-// Connection opened
+const socket = new WebSocket(location.);
+var term = new Terminal();
+term.open(document.getElementById('terminal'));
+term.write('Press enter to re-flush buffers');
+socket.write("{"device": "test", "tty": "port1"}");
 socket.addEventListener('open', function (event) {
     socket.send('Hello Server!');
 });
 
+term.on("key", function(key, ev) {
+    socket.send(key);
+});
+
 // Listen for messages
 socket.addEventListener('message', function (event) {
-    console.log('Message from server ', event.data);
+    term.write(event.data);
 });
 </script>
 </body>

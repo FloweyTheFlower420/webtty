@@ -48,4 +48,12 @@ public class SessionManager {
         cleanupStatus.set(false);
         sessions.forEach((key, value) -> value.close());
     }
+    
+    public TTYSession get(Session s) {
+        return sessions.get(s);
+    }
+
+    public boolean contains(Session s) {
+        return sessions.contains(s);
+    }
 }

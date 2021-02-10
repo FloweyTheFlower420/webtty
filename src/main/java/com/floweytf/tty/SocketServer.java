@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.Session;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static spark.Spark.halt;
@@ -14,22 +15,9 @@ public class SocketServer {
     BetterLogger logger = new BetterLogger(Main.logger) {{
         loggerName = "socket-server";
     }};
-    public static class SocketPayload {
-        String buffer;
-
+    public static class ConnectionInit {
         String tty;
         String device;
-        public int getType() {
-            boolean t1 = buffer != null;
-            boolean t2 = tty != null && device != null;
-
-            if(t1 == t2)
-                return -1;
-
-            if(t1)
-                return 1;
-            return 2;
-        }
     }
 
     static class ConnectionOpenResponse {
@@ -52,35 +40,35 @@ public class SocketServer {
         Main.logger.debug("Recevied websock connection: " + message);
         
         try {
-            SocketPayload heartbeat = Main.gson.fromJson(message, SocketPayload.class);
-            switch (heartbeat.getType()) {
-                case -1:
-                    user.close(400, "Invalid payload!");
-                    break;
-                case 1:
-                    Main.sessions.write(user, heartbeat.buffer);
-                    break;
-                case 2:
-                    String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);
+            if (Main.sessions.contains(user)) {
+                // treat as raw buffer
+                Main.sessions.write(user, message);
+            }
+            else {
+                ConnectionInit heartbeat = Main.gson.fromJson(message, ConnectionInit.class);
+                String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);
 
-                    // make sure that the tty exists in config
-                    if(s == null)
-                        user.close(400, "Invalid device/tty!");
+                // make sure that the tty exists in config
+                if (s == null)
+                    user.close(400, "Invalid device/tty!");
 
-                    // get UUID
-                    Main.sessions.newSession(s, user);
+                // get UUID
+                Main.sessions.newSession(s, user);
 
-                    logger.info("created session (" + user + ") with dev " + heartbeat.device + ":" + heartbeat.tty);
-                    user.getRemote().sendString(Main.gson.toJson(new ConnectionOpenResponse() {{
-                        tty = s;
-                    }}, ConnectionOpenResponse.class));
-                    break;
+                logger.info("created session (" + user + ") with dev " + heartbeat.device + ":" + heartbeat.tty);
+                user.getRemote().sendString(Main.gson.toJson(new ConnectionOpenResponse() {{
+                    tty = s;
+                }}, ConnectionOpenResponse.class));
             }
         }
-        catch (SessionException | JsonSyntaxException e) {
-            user.getRemote().sendString(e.getMessage());
-        } finally {
-            return;
+        catch (SessionException e ) {
+            user.close(500, e.getMessage());
+        }
+        catch (JsonSyntaxException e) {
+            user.close(400, e.getMessage());
+        }
+        catch (IOException e) {
+            // wtf
         }
     }
 
