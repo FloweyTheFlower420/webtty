@@ -7,18 +7,24 @@
 <body>
 <div id="terminal"></div>
 <script>
-    // Create WebSocket connection.
-const socket = new WebSocket(location.);
+// Create WebSocket connection.
+console.log("ws://" + location.hostname + ":" + location.port + "/device");
+const socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/device");
 var term = new Terminal();
-term.open(document.getElementById('terminal'));
-term.write('Press enter to re-flush buffers');
-socket.write("{"device": "test", "tty": "port1"}");
-socket.addEventListener('open', function (event) {
-    socket.send('Hello Server!');
-});
 
-term.on("key", function(key, ev) {
-    socket.send(key);
+term.open(document.getElementById('terminal'));
+term.write('Press enter to re-flush buffers\n');
+
+//while(socket.readyState !== 1);
+//console.log("connected!");
+
+socket.send("{\"device\": \"test\", \"tty\": \"port1\"}");
+
+term.onData( (data) => {
+    console.log(data);
+    if (data.charCodeAt(0) == 13)
+        socket.send('\n');
+    socket.send(data);
 });
 
 // Listen for messages

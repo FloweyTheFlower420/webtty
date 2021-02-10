@@ -33,8 +33,12 @@ public class Configuration {
                 HashMap<String, String> ttys = new HashMap<>();
                 for (JsonElement el : e.getAsJsonObject().get("ports").getAsJsonArray()) {
                     ttys.put(el.getAsJsonObject().get("name").getAsString(), el.getAsJsonObject().get("tty").getAsString());
-                    processList.add(r.exec("stty -F " + el.getAsJsonObject().get("tty").getAsString() + " " + el.getAsJsonObject().get("baud").getAsInt() +
-                            "1>/dev/null 2>&1"));
+                    processList.add(r.exec(new String[] {
+                            "stty",
+                            "-F",
+                            el.getAsJsonObject().get("tty").getAsString(),
+                            Integer.toString(el.getAsJsonObject().get("baud").getAsInt()),
+                    }));
                 }
 
                 tty.put(name, ttys);
