@@ -18,18 +18,21 @@ term.write('Press enter to re-flush buffers\n');
 //while(socket.readyState !== 1);
 //console.log("connected!");
 
-socket.send("{\"device\": \"test\", \"tty\": \"port1\"}");
+socket.addEventListener('open', function (event) {
+    console.log("connected to server!");
+    socket.send("{\"device\": \"test\", \"tty\": \"port1\"}");
 
-term.onData( (data) => {
-    console.log(data);
-    if (data.charCodeAt(0) == 13)
-        socket.send('\n');
-    socket.send(data);
-});
+    term.onData( (data) => {
+        console.log(data);
+        if (data.charCodeAt(0) == 13)
+            socket.send('\n');
+        socket.send(data);
+    });
 
-// Listen for messages
-socket.addEventListener('message', function (event) {
-    term.write(event.data);
+    // Listen for messages
+    socket.addEventListener('message', function (event) {
+        term.write(event.data);
+    });
 });
 </script>
 </body>

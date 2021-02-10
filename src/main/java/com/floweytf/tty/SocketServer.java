@@ -70,6 +70,9 @@ public class SocketServer {
         catch (IOException e) {
             // wtf
         }
+        catch (Exception e) {
+
+        }
     }
 
 }
