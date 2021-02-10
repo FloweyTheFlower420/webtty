@@ -26,23 +26,21 @@ public class SocketServer {
 
     @OnWebSocketConnect
     public void onConnect(Session user) throws Exception {
-        Main.logger.info("Websocket connected!");
+
     }
 
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
-        Main.logger.info("Websocket disconnected!");
         Main.sessions.closeSession(user);
     }
 
     @OnWebSocketMessage
     public void onMessage(Session user, String message) {
-        Main.logger.info("Recevied websock connection: " + message);
-        
         try {
-            if (Main.sessions.contains(user))
+            if (Main.sessions.contains(user)) {
+                // treat as raw buffer
                 Main.sessions.write(user, message);
-
+            }
             else {
                 ConnectionInit heartbeat = Main.gson.fromJson(message, ConnectionInit.class);
                 String s = Main.config.getTTY(heartbeat.device + '.' + heartbeat.tty);
@@ -68,6 +66,9 @@ public class SocketServer {
         }
         catch (IOException e) {
             // wtf
+        }
+        catch (Exception e) {
+
         }
     }
 

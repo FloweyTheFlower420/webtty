@@ -7,19 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class TTYSession {
     private final Thread runner;
-    private final ReentrantLock mutex = new ReentrantLock();
     private final InputStream reader;
     private final OutputStream writer;
-    private final AtomicBoolean isEnable = new AtomicBoolean(true);
-    private final AtomicBoolean isCrashed = new AtomicBoolean(false);
-    private String crashMessage = "";
     private BetterLogger logger;
-    private Session websock;
+    private final Session websock;
+    private final String tty;
 
     public TTYSession(String tty, Session session) throws SessionException {
         runner = new Thread(this::poll);
@@ -34,6 +29,7 @@ public class TTYSession {
             writer = new FileOutputStream(file, true);
             logger.info("tty has been opened successfully!");
             this.websock = session;
+            this.tty = tty;
             runner.start();
         }
         catch (FileNotFoundException e) {
@@ -49,16 +45,22 @@ public class TTYSession {
         logger.info("starting poll loop");
         try {
             int data;
-            while (isEnable.get()) {
-                data = reader.read();
-                if(data != -1) {
-                    websock.getRemote().sendString(Character.toString((char) data));
+            while (true) {
+                if(reader.available() > 0) {
+                    data = reader.read();
+                    if (data != -1) {
+                        websock.getRemote().sendString(Character.toString((char) data));
+                    }
                 }
             }
         }
         catch (IOException e) {
             websock.close(500, e.getMessage());
         }
+        catch (Exception e) {
+            // we chill
+        }
+        logger.info("Poll loop ended");
     }
 
     public void write(@NotNull String s) throws SessionException {
@@ -70,12 +72,16 @@ public class TTYSession {
         }
     }
 
+    public String getTTY() {
+        return tty;
+    }
+
     public void finalize() {
         close();
     }
 
     public void close() {
-        isEnable.set(false);
+        runner.interrupt();
         try {
             reader.close();
             writer.close();

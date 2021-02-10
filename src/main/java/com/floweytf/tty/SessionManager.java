@@ -37,6 +37,7 @@ public class SessionManager {
 
     public void closeSession(Session s) {
         sessions.get(s).close();
+        ttyInUse.remove(sessions.get(s).getTTY());
         sessions.remove(s);
     }
 
@@ -54,6 +55,6 @@ public class SessionManager {
     }
 
     public boolean contains(Session s) {
-        return sessions.contains(s);
+        return sessions.containsKey(s);
     }
 }
