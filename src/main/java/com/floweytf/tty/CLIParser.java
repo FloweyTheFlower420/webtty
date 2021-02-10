@@ -3,6 +3,15 @@ package com.floweytf.tty;
 import org.apache.commons.cli.*;
 
 public class CLIParser {
+    /**
+     * parses command line arguments, args are:
+     *   -d, --debug
+     *   --no-timeout
+     *   --config=[file]
+     *   --spark-threads=[threads]
+     * @param args program arguments
+     * @return parsed commandline args
+     */
     public static CommandLine parse(String... args) {
         // parse cli arguments
         Options options = new Options();
