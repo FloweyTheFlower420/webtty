@@ -54,6 +54,6 @@ public class SessionManager {
     }
 
     public boolean contains(Session s) {
-        return sessions.contains(s);
+        return sessions.containsKey(s);
     }
 }

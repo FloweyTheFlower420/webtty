@@ -10,6 +10,7 @@
 // Create WebSocket connection.
 console.log("ws://" + location.hostname + ":" + location.port + "/device");
 const socket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/device");
+//const socket = new WebSocket("ws://echo.websocket.org");
 var term = new Terminal();
 
 term.open(document.getElementById('terminal'));
@@ -24,16 +25,20 @@ socket.addEventListener('open', function (event) {
 
     term.onData( (data) => {
         console.log(data);
-        if (data.charCodeAt(0) == 13)
-            socket.send('\n');
         socket.send(data);
     });
 
     // Listen for messages
     socket.addEventListener('message', function (event) {
+        console.log("got data: " + event.data);
         term.write(event.data);
     });
 });
+
+socket.addEventListener('close', () => {
+    console.log("Closed!");
+});
+
 </script>
 </body>
 </html>

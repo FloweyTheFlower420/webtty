@@ -26,19 +26,16 @@ public class SocketServer {
 
     @OnWebSocketConnect
     public void onConnect(Session user) throws Exception {
-        Main.logger.info("Websocket connected!");
+
     }
 
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
-        Main.logger.info("Websocket disconnected!");
         Main.sessions.closeSession(user);
     }
 
     @OnWebSocketMessage
     public void onMessage(Session user, String message) {
-        Main.logger.info("Recevied websock connection: " + message);
-        
         try {
             if (Main.sessions.contains(user)) {
                 // treat as raw buffer
