@@ -10,11 +10,12 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class TTYSession {
     private final Thread runner;
-    private final FileChannel reader;
-    private final FileChannel writer;
+    private final FileChannel fileChannel;
     private BetterLogger logger;
     private final Session websock;
     private final String tty;
@@ -25,16 +26,15 @@ public class TTYSession {
             logger = new BetterLogger(Main.logger);
             logger.loggerName += "/" + runner.getName() + "-init";
 
-            File file = new File(tty);
+            Path file = Paths.get(tty);
             logger.info("opening tty: "  + tty);
-            reader = new FileInputStream(file).getChannel();
-            writer = new FileOutputStream(file, true).getChannel();
+            fileChannel = FileChannel.open(file);
             logger.info("tty has been opened successfully!");
             this.websock = session;
             this.tty = tty;
             runner.start();
         }
-        catch (FileNotFoundException e) {
+        catch (IOException e) {
             logger.error("Failed to open tty!", (Throwable)e);
             throw new SessionException("Failed to open tty!");
         }
@@ -47,15 +47,15 @@ public class TTYSession {
         logger.info("starting poll loop");
         try {
             ByteBuffer buf = ByteBuffer.allocate(64);
-            while (!runner.isInterrupted()) {
-                int size = reader.read(buf);
+            while (true) {
+                /*int size = fileChannel.read(buf);
                 if(size != 0)
-                    websock.getRemote().sendString(StandardCharsets.UTF_8.decode(buf).toString());
+                    websock.getRemote().sendString(StandardCharsets.UTF_8.decode(buf).toString());*/
             }
         }
-        catch (IOException e) {
+        /*catch (IOException e) {
             websock.close(500, e.getMessage());
-        }
+        }*/
         catch (Exception e) {
             // we chill
         }
@@ -64,7 +64,9 @@ public class TTYSession {
 
     public void write(@NotNull String s) throws SessionException {
         try {
-            writer.write(ByteBuffer.wrap(s.getBytes()));
+            ByteBuffer buf = ByteBuffer.wrap(s.getBytes());
+            while(buf.hasRemaining())
+                fileChannel.write(buf);
         }
         catch (IOException e) {
             throw new SessionException("Underlying IO failed!" + e.getMessage());
@@ -82,8 +84,7 @@ public class TTYSession {
     public void close() {
         runner.interrupt();
         try {
-            reader.close();
-            writer.close();
+            fileChannel.close();
         }
         catch (IOException e) {
             // ignore
