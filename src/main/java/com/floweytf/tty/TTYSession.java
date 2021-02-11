@@ -65,6 +65,7 @@ public class TTYSession {
     public void write(@NotNull String s) throws SessionException {
         try {
             ByteBuffer buf = ByteBuffer.wrap(s.getBytes());
+            buf.flip();
             while(buf.hasRemaining())
                 fileChannel.write(buf);
         }
