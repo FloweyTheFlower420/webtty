@@ -34,6 +34,7 @@ function connect() {
 
     socket.addEventListener('close', () => {
         console.log("Closed!");
+        disconnect();
     });
 }
 
