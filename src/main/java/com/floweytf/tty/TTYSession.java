@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class TTYSession {
     private final Thread runner;
@@ -82,7 +83,7 @@ public class TTYSession {
     public void close() {
         runner.interrupt();
         try {
-            writer.write('\n');
+            writer.write("exit\n".getBytes());
             reader.close();
             writer.close();
         }
