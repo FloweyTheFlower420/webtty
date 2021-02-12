@@ -46,12 +46,11 @@ public class TTYSession {
         try {
             int data;
             while (true) {
-                if(reader.available() > 0) {
-                    data = reader.read();
-                    if (data != -1) {
-                        websock.getRemote().sendString(Character.toString((char) data));
-                    }
+                data = reader.read();
+                if (data != -1) {
+                    websock.getRemote().sendString(Character.toString((char) data));
                 }
+
             }
         }
         catch (IOException e) {
@@ -83,14 +82,12 @@ public class TTYSession {
     public void close() {
         runner.interrupt();
         try {
+            writer.write('\n');
             reader.close();
             writer.close();
         }
         catch (IOException e) {
             // ignore
         }
-
-        // wait for it to actually close
-        while(runner.isAlive());
     }
 }
